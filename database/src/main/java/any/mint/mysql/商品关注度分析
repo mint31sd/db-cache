@@ -1,3 +1,4 @@
+
 /*假设有若干品牌，每个品牌下有若干门店，每个门店里的商品被用户拿起一次，就会产生一条商品关注数据，此为背景。
 商品关注数据的表结构(item_concern_data)设计如下：
 brand_id, shop_id, item_id, move_ts
@@ -15,6 +16,7 @@ move_ts:商品被拿起的时间戳
 3.如果item_concern_data这张表的数据量达到1000万条，除了建索引，还有哪些方案可以优化查询和统计效率。
 */
 
+//按照按照商品,门店,品牌的顺序进行分组查询统计,后取结果集的前十名
 1. SELECT
     *
 FROM
@@ -28,7 +30,9 @@ FROM
 ORDER BY cnt DESC
 LIMIT 0 , 10
 
-2. CREATE UNIQUE INDEX `idx_item_concern_data_item_id_shop_id`  ON `philod`.`item_concern_data` (item_id, shop_id) COMMENT '' ALGORITHM DEFAULT LOCK DEFAULT
+//品牌若干:较少 故建立商品和门店的联合索引即可
+2. CREATE UNIQUE INDEX `idx_item_concern_data_item_id_shop_id`
+    ON `philod`.`item_concern_data` (item_id, shop_id) COMMENT '' ALGORITHM DEFAULT LOCK DEFAULT
 
 3.按照月份建分区表 ,数据库主从读写分离
 

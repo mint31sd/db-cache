@@ -1,0 +1,34 @@
+/*假设有若干品牌，每个品牌下有若干门店，每个门店里的商品被用户拿起一次，就会产生一条商品关注数据，此为背景。
+商品关注数据的表结构(item_concern_data)设计如下：
+brand_id, shop_id, item_id, move_ts
+字段注释如下：
+brand_id:品牌id
+shop_id:门店id
+item_id:商品id
+move_ts:商品被拿起的时间戳
+
+问题:
+1.请统计出在一个月时间内，每个品牌下关注度排名前十的商品，并打印出商品所在门店，品牌，被拿起次数的信息。
+
+2.在问题1的场景下，给item_concern_data这张表建索引。
+
+3.如果item_concern_data这张表的数据量达到1000万条，除了建索引，还有哪些方案可以优化查询和统计效率。
+*/
+
+1. SELECT
+    *
+FROM
+    (SELECT
+        brand_id, shop_id, COUNT(move_ts) AS cnt
+    FROM
+        philod.item_concern_data
+    WHERE
+        move_ts BETWEEN '2020-04-01 00:00:00' AND '2020-04-30 23:59:59'
+    GROUP BY item_id , shop_id , brand_id) res
+ORDER BY cnt DESC
+LIMIT 0 , 10
+
+2. CREATE UNIQUE INDEX `idx_item_concern_data_item_id_shop_id`  ON `philod`.`item_concern_data` (item_id, shop_id) COMMENT '' ALGORITHM DEFAULT LOCK DEFAULT
+
+3.按照月份建分区表 ,数据库主从读写分离
+
